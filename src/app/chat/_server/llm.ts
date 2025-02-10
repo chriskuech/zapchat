@@ -6,10 +6,11 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionToolMessageParam,
 } from "openai/resources/chat/completions.mjs";
+import { cache } from "react";
 
 export class LlmError extends Error {}
 
-const openai = new OpenAI();
+const openai = cache(() => new OpenAI());
 
 export type Tool = Parameters<typeof zodFunction>[0];
 
@@ -18,7 +19,7 @@ export const getCompletions = async (
   tools: Tool[]
 ): Promise<ChatCompletionMessageParam[]> => {
   console.log("MESSAGES", messages);
-  const completion = await openai.chat.completions.create({
+  const completion = await openai().chat.completions.create({
     messages,
     model: "gpt-4o",
     tools: tools.map(zodFunction),
