@@ -19,3 +19,9 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.prose {
+  ul {
+    list-style-type: disc;
+  }
+}
