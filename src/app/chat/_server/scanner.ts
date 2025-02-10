@@ -3,11 +3,11 @@ import type { paths } from "@/zaproxy";
 import createClient from "openapi-fetch";
 
 const client = createClient<paths>({
-  baseUrl: config.ZAP_BASE_URL,
+  baseUrl: config().ZAP_BASE_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
-    "X-ZAP-API-Key": config.ZAP_API_KEY,
+    "X-ZAP-API-Key": config().ZAP_API_KEY,
   },
 });
 
