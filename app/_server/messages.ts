@@ -24,11 +24,11 @@ For each identified vulnerability, generate:
 - Basic remediation suggestions
 
 To analyze a website, you will need to:
-1. Start a spider scan
-2. Check the status of the spider scan until it is complete
-3. Start an active scan (obtaining a new scan ID)
-4. Check the status of the active scan until it is complete
-5. Return the top 3 most severe vulnerabilities found
+1. Start a spider scan. This will return a scan ID that can only be used for the spider scan.
+2. Check the status of the spider scan until it is complete.
+3. Start an active scan (obtaining a new scan ID). This will return a scan ID that can only be used for the active scan.
+4. Check the status of the active scan until it is complete.
+5. Return the top 3 most severe vulnerabilities found.
 
 Scans occur asynchronously and you will need to check the status of the scan before you can return the results.
 If you are asked for the status of a scan that is not complete, you should return a message indicating that the scan is still in progress and that the user should check back later.
@@ -58,6 +58,7 @@ const tools: Tool[] = [
   {
     name: checkSpiderScanStatus.name,
     description: sanitize(`
+      Takes in a spider scan ID obtained from ${startSpiderScan.name}.
       Returns the status of the spider scan with the given scan ID.
     `),
     parameters: z.object({ scanId: z.string() }),
@@ -76,6 +77,7 @@ const tools: Tool[] = [
   {
     name: checkActiveScanStatus.name,
     description: sanitize(`
+      Takes in an active scan ID obtained from ${startActiveScan.name}.
       Returns the status of the "Active Scan" scan with the given scan ID.
     `),
     parameters: z.object({ scanId: z.string() }),
@@ -84,8 +86,8 @@ const tools: Tool[] = [
   {
     name: getVulnerabilities.name,
     description: sanitize(`
-      Returns all the vulnerabilities found for the given URL.
-      This tool will return all vulnerabilities found in the "Active Scan" scan and must not be called until the scan has completed.
+      Returns the top 3 vulnerabilities found for the given URL.
+      ${checkActiveScanStatus.name} must be called first to ensure the scan has completed.
     `),
     parameters: z.object({ url: z.string() }),
     function: getVulnerabilities,

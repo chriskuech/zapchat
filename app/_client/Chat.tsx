@@ -40,9 +40,10 @@ export default function Chat({ messages }: ChatProps) {
                 ? [{ role, content }]
                 : []
             )
-            .map(({ role, content }) => (
+            .map(({ role, content }, index) => (
               <div
-                key={content}
+                // TODO: this would be better suited as an ID or timestamp
+                key={index + content}
                 className={`rounded-lg p-4 max-w-[80%]`}
                 style={
                   role === "assistant"

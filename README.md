@@ -14,9 +14,12 @@ zapchat is a chatbot that uses ZAP to scan your code and find vulnerabilities. I
 
 This is a standard Next.js monolith. Due to time limitations, all logic is synchronously executed within the request-response cycle, rather than suitably architected to support running scans asynchronously and pushing updates back to the client. This also means that the user must prompt for status updates to drive the process forward.
 
+The central data model is `ChatCompletionMessageParam` from OpenAI SDK, which significantly simplifies the implementation. However, it doesn't have a timestamp and is persisted to cookies, which is evidentally flakey and can affect the messages fed to the LLM and subsequent quality of results.
+
 ## Other Assumptions
 
 - Currently ranking "top" alerts by risk then confidence.
+- Codebase has been annotated with TODOs containing assumptions/limitations.
 
 # Production
 
