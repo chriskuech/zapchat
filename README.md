@@ -12,7 +12,7 @@ zapchat is a chatbot that uses ZAP to scan your code and find vulnerabilities. I
 
 # Architecture & Limitations
 
-This is a standard Next.js monolith. Due to time limitations, all logic is synchronously executed within the request-response cycle, rather than suitably architected to support running scans asynchronously and pushing updates back to the client. This also means that the user must prompt for status updates to drive the process forward.
+This is a standard Next.js monolith. Due to time limitations, all logic is synchronously executed within the request-response cycle, rather than suitably architected to support running scans asynchronously and pushing updates back to the client. This also means that the user must prompt for status updates to drive the process forward. The LLM orchestrates all the tool calls to demonstrate tool calling, but it would be abstracted behind one or two tools.
 
 The central data model is `ChatCompletionMessageParam` from OpenAI SDK, which significantly simplifies the implementation. However, it doesn't have a timestamp and is persisted to cookies, which is evidentally flakey and can affect the messages fed to the LLM and subsequent quality of results.
 
