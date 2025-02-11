@@ -2,7 +2,7 @@
 
 import { marked } from "marked";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { clearMessages, sendMessage } from "../actions";
 
 export default function Chat({
@@ -10,7 +10,12 @@ export default function Chat({
 }: {
   messages: ChatCompletionMessageParam[];
 }) {
+  const [showSpinner, setShowSpinner] = useState(false);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    setShowSpinner(false);
+  }, [messages]);
 
   const handleSubmit = () => {
     sendMessage(message);
@@ -62,7 +67,7 @@ export default function Chat({
             onClick={handleSubmit}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
           >
-            Send
+            {showSpinner ? "Sending..." : "Send"}
           </button>
           <button
             onClick={() => clearMessages()}
