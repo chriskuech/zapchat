@@ -5,13 +5,12 @@ import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { z } from "zod";
 import { getCompletions, sanitize, Tool } from "./llm";
 import {
-  checkScanStatus,
+  checkScanStatus as checkActiveScanStatus,
+  getSpiderScanStatus as checkSpiderScanStatus,
   getVulnerabilities,
   startActiveScan,
   startSpiderScan,
 } from "./scanner";
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const systemPrompt = `
 You are a chat assistant for a website vulnerability scanner abstracting OWASP ZAP API (aka zaproxy).
@@ -23,6 +22,13 @@ For each identified vulnerability, generate:
 - Clear, non-technical explanation
 - Potential impact
 - Basic remediation suggestions
+
+To analyze a website, you will need to:
+1. Start a spider scan
+2. Check the status of the spider scan until it is complete
+3. Start an active scan
+4. Check the status of the active scan until it is complete
+5. Return the top 3 most severe vulnerabilities found
 
 Scans occur asynchronously and you will need to check the status of the scan before you can return the results.
 If you are asked for the status of a scan that is not complete, you should return a message indicating that the scan is still in progress and that the user should check back later.
@@ -41,32 +47,39 @@ To get started, please provide me with the URL you'd like to start scanning, or 
 
 const tools: Tool[] = [
   {
-    name: "startScan",
+    name: startSpiderScan.name,
+    description: sanitize(`
+      Starts a new spider scan on the given URL.
+      The scan will run asynchronously and return its scan ID.
+    `),
+    parameters: z.object({ url: z.string() }),
+    function: startSpiderScan,
+  },
+  {
+    name: checkSpiderScanStatus.name,
+    description: sanitize(`
+      Returns the status of the spider scan with the given scan ID.
+    `),
+    parameters: z.object({ scanId: z.string() }),
+    function: checkSpiderScanStatus,
+  },
+  {
+    name: startActiveScan.name,
     description: sanitize(`
       Starts a new vulnerability scan on the given URL.
       The scan will run asynchronously and return its scan ID.
       Internally, this tool will start a "Spider Scan" then an "Active Scan" and return the "Active Scan" API response.
     `),
     parameters: z.object({ url: z.string() }),
-    function: async ({ url }) => {
-      await startSpiderScan({ url });
-
-      // TODO: The Active Scan (allegedly) can start after starting the Spider Scan,
-      //       but seems to (in practice) hit a race condition.
-      await sleep(1_000);
-
-      const activeScan = await startActiveScan({ url });
-
-      return activeScan;
-    },
+    function: startActiveScan,
   },
   {
-    name: checkScanStatus.name,
+    name: checkActiveScanStatus.name,
     description: sanitize(`
       Returns the status of the "Active Scan" scan with the given scan ID.
     `),
     parameters: z.object({ scanId: z.string() }),
-    function: checkScanStatus,
+    function: checkActiveScanStatus,
   },
   {
     name: getVulnerabilities.name,

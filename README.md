@@ -1,21 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# zapchat
 
-## Getting Started
+zapchat is a chatbot that uses ZAP to scan your code and find vulnerabilities. It's built with Next.js and uses the OpenAI API to generate responses.
 
-First, run the development server:
+# Setup
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Copy `.env.template` to `.env` and set the environment variables.
+2. Run `npm install` to install the dependencies.
+3. Run `docker compose up` to start the zap container.
+4. Run `npm run dev` to start the development server.
+5. Open [http://localhost:3000](http://localhost:3000) to interact with the chatbot. An example input is provided in the app.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Architecture
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This is a standard Next.js monolith. Due to time limitations, all logic is synchronously executed within the request-response cycle, rather than suitably architected to support running scans asynchronously and pushing updates back to the client.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Assumptions/Limitations
+
+- Aforementioned architecture limitations.
+- I have been using https://juice-shop.herokuapp.com to test the chatbot.
+- Currently ranking alerts by risk then confidence.

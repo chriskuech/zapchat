@@ -80,14 +80,7 @@ export const getCompletions = async (
     return [
       completionMessage,
       {
-        content: sanitize(`
-          An error occurred while processing the message.
-          
-          ### Error
-          \`\`\`
-          ${error}
-          \`\`\`
-        `),
+        content: "An error occurred while processing the message.",
         role: "assistant",
       },
     ];

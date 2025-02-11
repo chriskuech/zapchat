@@ -2,7 +2,7 @@ import "server-only";
 
 import createClient from "openapi-fetch";
 import { cache } from "react";
-import { pipe, sortBy, take } from "remeda";
+import { map, pipe, prop, sortBy, take } from "remeda";
 import { z } from "zod";
 import { config } from "./config";
 import type { paths } from "./zaproxy";
@@ -34,6 +34,30 @@ export async function startSpiderScan({ url }: StartSpiderScanParams) {
 
   if (error) {
     throw new ScannerError("Failed to start spider scan", { cause: error });
+  }
+
+  return data;
+}
+
+type GetSpiderScanStatusParams = {
+  scanId: string;
+};
+
+export async function getSpiderScanStatus({
+  scanId,
+}: GetSpiderScanStatusParams) {
+  const { data, error } = await client().GET("/JSON/spider/view/status/", {
+    params: {
+      query: {
+        scanId,
+      },
+    },
+  });
+
+  if (error) {
+    throw new ScannerError("Failed to get spider scan status", {
+      cause: error,
+    });
   }
 
   return data;
@@ -126,10 +150,12 @@ export async function getVulnerabilities({ url }: GetVulnerabilitiesParams) {
   // TODO: this assumes "Top 3" vulnerabilities are rated by risk then confidence
   return pipe(
     alerts,
-    sortBy((alert) => [
-      -severities.indexOf(alert.risk),
-      -severities.indexOf(alert.confidence),
-    ]),
+    map((alert) => ({
+      ...alert,
+      riskScore: severities.indexOf(alert.risk),
+      confidenceScore: severities.indexOf(alert.confidence),
+    })),
+    sortBy([prop("riskScore"), "desc"], [prop("confidenceScore"), "desc"]),
     take(3)
   );
 }
