@@ -7,7 +7,6 @@ const client = cache(() =>
   createClient<paths>({
     baseUrl: config().ZAP_BASE_URL,
     headers: {
-      "Content-Type": "application/json",
       Accept: "application/json",
       "X-ZAP-API-Key": config().ZAP_API_KEY,
     },
