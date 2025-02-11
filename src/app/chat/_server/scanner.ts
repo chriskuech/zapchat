@@ -1,15 +1,18 @@
 import { config } from "@/config";
 import type { paths } from "@/zaproxy";
 import createClient from "openapi-fetch";
+import { cache } from "react";
 
-const client = createClient<paths>({
-  baseUrl: config().ZAP_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-    "X-ZAP-API-Key": config().ZAP_API_KEY,
-  },
-});
+const client = cache(() =>
+  createClient<paths>({
+    baseUrl: config().ZAP_BASE_URL,
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "X-ZAP-API-Key": config().ZAP_API_KEY,
+    },
+  })
+);
 
 type StartSpiderScanParams = {
   url: string;
@@ -17,7 +20,7 @@ type StartSpiderScanParams = {
 
 export async function startSpiderScan({ url }: StartSpiderScanParams) {
   // @ts-expect-error - bug in zaproxy openapi
-  const { data } = await client.POST("/JSON/spider/action/scan/", {
+  const { data } = await client().POST("/JSON/spider/action/scan/", {
     params: {
       query: {
         url,
@@ -33,7 +36,7 @@ type StartActiveScanParams = {
 };
 
 export async function startActiveScan({ url }: StartActiveScanParams) {
-  const { data } = await client.GET("/JSON/ascan/action/scan/", {
+  const { data } = await client().GET("/JSON/ascan/action/scan/", {
     params: {
       query: {
         url,
@@ -49,7 +52,7 @@ type CheckScanStatusParams = {
 };
 
 export async function checkScanStatus({ scanId }: CheckScanStatusParams) {
-  const { data } = await client.GET("/JSON/ascan/view/status/", {
+  const { data } = await client().GET("/JSON/ascan/view/status/", {
     params: {
       query: {
         scanId,
@@ -65,7 +68,7 @@ type GetVulnerabilitiesParams = {
 };
 
 export async function getVulnerabilities({ url }: GetVulnerabilitiesParams) {
-  const { data } = await client.GET("/JSON/alert/view/alerts/", {
+  const { data } = await client().GET("/JSON/alert/view/alerts/", {
     params: {
       query: {
         baseurl: url,
