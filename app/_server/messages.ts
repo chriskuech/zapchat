@@ -26,7 +26,7 @@ For each identified vulnerability, generate:
 To analyze a website, you will need to:
 1. Start a spider scan
 2. Check the status of the spider scan until it is complete
-3. Start an active scan
+3. Start an active scan (obtaining a new scan ID)
 4. Check the status of the active scan until it is complete
 5. Return the top 3 most severe vulnerabilities found
 

@@ -10,12 +10,10 @@ zapchat is a chatbot that uses ZAP to scan your code and find vulnerabilities. I
 4. Run `npm run dev` to start the development server.
 5. Open [http://localhost:3000](http://localhost:3000) to interact with the chatbot. An example input is provided in the app.
 
-# Architecture
+# Architecture & Limitations
 
-This is a standard Next.js monolith. Due to time limitations, all logic is synchronously executed within the request-response cycle, rather than suitably architected to support running scans asynchronously and pushing updates back to the client.
+This is a standard Next.js monolith. Due to time limitations, all logic is synchronously executed within the request-response cycle, rather than suitably architected to support running scans asynchronously and pushing updates back to the client. This also means that the user must prompt for status updates to drive the process forward.
 
-# Assumptions/Limitations
+## Other Assumptions
 
-- Aforementioned architecture limitations.
-- I have been using https://juice-shop.herokuapp.com to test the chatbot.
-- Currently ranking alerts by risk then confidence.
+- Currently ranking "top" alerts by risk then confidence.

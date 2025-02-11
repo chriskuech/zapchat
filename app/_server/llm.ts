@@ -73,7 +73,7 @@ export const getCompletions = async (
       throw new LlmError("No message");
     }
 
-    return [message];
+    return [completionMessage, message];
   } catch (error) {
     console.error("LLM ERROR", error);
 
