@@ -8,6 +8,7 @@ const client = cache(() =>
     baseUrl: config().ZAP_BASE_URL,
     headers: {
       "X-ZAP-API-Key": config().ZAP_API_KEY,
+      "Content-Type": "application/x-www-form-urlencoded",
     },
   })
 );
