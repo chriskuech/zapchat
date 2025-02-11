@@ -12,7 +12,7 @@ import {
 } from "./scanner";
 
 const systemPrompt = `
-You are a helpful assistant.
+You are a chat assistant for a website vulnerability scanner.
 You are given a conversation history and a new message.
 You need to respond to the new message based on the conversation history.
 Some operations are asynchronous, in which case you should use the provided tools to perform the operation
@@ -21,7 +21,7 @@ Some operations are asynchronous, in which case you should use the provided tool
 const tools: Tool[] = [
   {
     name: "startScan",
-    description: `Starts a new "Spider Scan" on the given URL, then starts an "Active Scan" on the given URL. The scan will run asynchronously and return its scan ID.`,
+    description: `Starts a new vulnerability scan on the given URL. The scan will run asynchronously and return its scan ID.`,
     parameters: z.object({ url: z.string() }),
     function: async ({ url }) => {
       await startSpiderScan({ url });
@@ -68,6 +68,7 @@ export async function sendMessage(message: string) {
   messages.push({ content: message, role: "user" });
 
   while (messages.at(-1)?.role !== "assistant") {
+    console.log("MESSAGES", JSON.stringify(messages, null, 2));
     const completions = await getCompletions(messages, tools);
     messages.push(...completions);
   }

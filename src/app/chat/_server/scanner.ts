@@ -3,6 +3,8 @@ import type { paths } from "@/zaproxy";
 import createClient from "openapi-fetch";
 import { cache } from "react";
 
+export class ScannerError extends Error {}
+
 const client = cache(() =>
   createClient<paths>({
     baseUrl: config().ZAP_BASE_URL,
@@ -19,13 +21,17 @@ type StartSpiderScanParams = {
 
 export async function startSpiderScan({ url }: StartSpiderScanParams) {
   // @ts-expect-error - bug in zaproxy openapi
-  const { data } = await client().POST("/JSON/spider/action/scan/", {
+  const { data, error } = await client().POST("/JSON/spider/action/scan/", {
     params: {
       query: {
         url,
       },
     },
   });
+
+  if (error) {
+    throw new ScannerError("Failed to start spider scan", { cause: error });
+  }
 
   return data;
 }
@@ -35,13 +41,17 @@ type StartActiveScanParams = {
 };
 
 export async function startActiveScan({ url }: StartActiveScanParams) {
-  const { data } = await client().GET("/JSON/ascan/action/scan/", {
+  const { data, error } = await client().GET("/JSON/ascan/action/scan/", {
     params: {
       query: {
         url,
       },
     },
   });
+
+  if (error) {
+    throw new ScannerError("Failed to start active scan", { cause: error });
+  }
 
   return data;
 }
@@ -51,13 +61,17 @@ type CheckScanStatusParams = {
 };
 
 export async function checkScanStatus({ scanId }: CheckScanStatusParams) {
-  const { data } = await client().GET("/JSON/ascan/view/status/", {
+  const { data, error } = await client().GET("/JSON/ascan/view/status/", {
     params: {
       query: {
         scanId,
       },
     },
   });
+
+  if (error) {
+    throw new ScannerError("Failed to check scan status", { cause: error });
+  }
 
   return data;
 }
@@ -67,7 +81,7 @@ type GetVulnerabilitiesParams = {
 };
 
 export async function getVulnerabilities({ url }: GetVulnerabilitiesParams) {
-  const { data } = await client().GET("/JSON/alert/view/alerts/", {
+  const { data, error } = await client().GET("/JSON/alert/view/alerts/", {
     params: {
       query: {
         baseurl: url,
@@ -76,6 +90,10 @@ export async function getVulnerabilities({ url }: GetVulnerabilitiesParams) {
       },
     },
   });
+
+  if (error) {
+    throw new ScannerError("Failed to get vulnerabilities", { cause: error });
+  }
 
   return data;
 }
