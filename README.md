@@ -17,3 +17,7 @@ This is a standard Next.js monolith. Due to time limitations, all logic is synch
 ## Other Assumptions
 
 - Currently ranking "top" alerts by risk then confidence.
+
+# Production
+
+This app is publicly accessible at https://zapchat-production.up.railway.app/.

@@ -27,64 +27,54 @@ export const getCompletions = async (
   const completionMessage = completion.choices[0]?.message;
 
   if (!completionMessage) {
-    throw new LlmError("No completion message");
-  }
-
-  try {
-    const toolCalls = completionMessage.tool_calls ?? [];
-
-    if (toolCalls.length) {
-      try {
-        const toolMessages: ChatCompletionToolMessageParam[] =
-          await Promise.all(
-            toolCalls.map(
-              async ({ id, function: { name, arguments: args } }) => {
-                const tool = tools.find((tool) => tool.name === name);
-
-                if (!tool) {
-                  throw new LlmError("Unexpected tool call");
-                }
-
-                if (!tool.function) {
-                  throw new LlmError("Tool function not found");
-                }
-
-                const toolArgs = tool.parameters.parse(JSON.parse(args));
-                const rawContent = await tool.function(toolArgs);
-
-                return {
-                  content: JSON.stringify(rawContent),
-                  role: "tool",
-                  tool_call_id: id,
-                };
-              }
-            )
-          );
-
-        return [completionMessage, ...toolMessages];
-      } catch (error) {
-        throw new LlmError("Failed to process tool calls", { cause: error });
-      }
-    }
-
-    const message = completion.choices[0]?.message;
-
-    if (!message) {
-      throw new LlmError("No message");
-    }
-
-    return [completionMessage, message];
-  } catch (error) {
-    console.error("LLM ERROR", error);
-
     return [
-      completionMessage,
       {
-        content: "An error occurred while processing the message.",
+        content: "No response from LLM",
         role: "assistant",
       },
     ];
   }
+
+  const toolCalls = completionMessage.tool_calls ?? [];
+
+  if (toolCalls.length) {
+    try {
+      const toolMessages = await Promise.all<ChatCompletionToolMessageParam>(
+        toolCalls.map(async ({ id, function: { name, arguments: args } }) => {
+          const tool = tools.find((tool) => tool.name === name);
+
+          if (!tool) {
+            throw new LlmError("Unexpected tool call");
+          }
+
+          if (!tool.function) {
+            throw new LlmError("Tool function not found");
+          }
+
+          const toolArgs = tool.parameters.parse(JSON.parse(args));
+          const rawContent = await tool.function(toolArgs);
+
+          return {
+            content: JSON.stringify(rawContent),
+            role: "tool",
+            tool_call_id: id,
+          };
+        })
+      );
+
+      return [completionMessage, ...toolMessages];
+    } catch (error) {
+      return [
+        completionMessage,
+        {
+          content: `System failed to process tool call(s). ${error}`,
+          role: "assistant",
+        },
+      ];
+    }
+  }
+
+  return [completionMessage];
 };
 
 export const sanitize = (string: string) =>
