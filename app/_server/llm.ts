@@ -8,11 +8,11 @@ import {
 } from "openai/resources/chat/completions.mjs";
 import { cache } from "react";
 
+class LlmError extends Error {}
+
 const openai = cache(() => new OpenAI());
 
 export type Tool = Parameters<typeof zodFunction>[0];
-
-class LlmError extends Error {}
 
 export const getCompletions = async (
   messages: ChatCompletionMessageParam[],
@@ -70,7 +70,7 @@ export const getCompletions = async (
     const message = completion.choices[0]?.message;
 
     if (!message) {
-      throw new Error("No message");
+      throw new LlmError("No message");
     }
 
     return [message];

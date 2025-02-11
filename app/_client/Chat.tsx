@@ -22,6 +22,7 @@ export default function Chat({
   }, [messages]);
 
   const handleSubmit = () => {
+    setShowSpinner(true);
     sendMessage(message).catch(() => toast.error("Error sending message"));
     setMessage("");
   };

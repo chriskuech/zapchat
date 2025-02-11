@@ -23,6 +23,8 @@ For each identified vulnerability, generate:
 - Basic remediation suggestions
 
 Scans occur asynchronously and you will need to check the status of the scan before you can return the results.
+If you are asked for the status of a scan that is not complete, you should return a message indicating that the scan is still in progress and that the user should check back later.
+Do not "busy wait" for the scan to complete by calling the tool again.
 
 Return messages in markdown format. Emphasis on clear, actionable vulnerability explanations.
 `;

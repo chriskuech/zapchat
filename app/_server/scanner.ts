@@ -2,6 +2,8 @@ import "server-only";
 
 import createClient from "openapi-fetch";
 import { cache } from "react";
+import { pipe, sortBy, take } from "remeda";
+import { z } from "zod";
 import { config } from "./config";
 import type { paths } from "./zaproxy";
 
@@ -81,13 +83,30 @@ type GetVulnerabilitiesParams = {
   url: string;
 };
 
+const severities = ["Low", "Medium", "High", "Critical"] as const;
+const SeveritySchema = z.enum(severities);
+
+const AlertSchema = z.object({
+  risk: SeveritySchema,
+  confidence: SeveritySchema,
+  name: z.string(),
+  description: z.string(),
+  other: z.string(),
+  solution: z.string(),
+});
+
+const GetVulnerabilitiesResponseSchema = z.object({
+  alerts: z.array(AlertSchema),
+});
+
 export async function getVulnerabilities({ url }: GetVulnerabilitiesParams) {
   const { data, error } = await client().GET("/JSON/alert/view/alerts/", {
     params: {
       query: {
         baseurl: url,
+        // TODO: verify appropriate range or implement pagination
         start: "0",
-        count: `${Number.MAX_SAFE_INTEGER}`, // TODO: verify appropriate range or implement pagination
+        count: `${Number.MAX_SAFE_INTEGER}`,
       },
     },
   });
@@ -96,5 +115,15 @@ export async function getVulnerabilities({ url }: GetVulnerabilitiesParams) {
     throw new ScannerError("Failed to get vulnerabilities", { cause: error });
   }
 
-  return data;
+  const { alerts } = GetVulnerabilitiesResponseSchema.parse(data);
+
+  // TODO: this assumes "Top 3" vulnerabilities are rated by risk then confidence
+  return pipe(
+    alerts,
+    sortBy((alert) => [
+      -severities.indexOf(alert.risk),
+      -severities.indexOf(alert.confidence),
+    ]),
+    take(3)
+  );
 }
