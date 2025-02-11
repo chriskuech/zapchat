@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,23 +29,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col h-screen">
           <header className="bg-gray-800 text-white py-4">
             <div className="container mx-auto px-4">
               <h1 className="text-2xl font-bold">zapchat</h1>
-              <nav>
-                <ul className="flex space-x-4">
-                  <li>
-                    <Link href="/chat">Chat</Link>
-                  </li>
-                  <li>
-                    <Link href="/about">About</Link>
-                  </li>
-                </ul>
-              </nav>
             </div>
           </header>
           <main className="flex-grow">{children}</main>
+          <ToastContainer />
         </div>
       </body>
     </html>

@@ -1,7 +1,9 @@
-import { config } from "@/config";
-import type { paths } from "@/zaproxy";
+import "server-only";
+
 import createClient from "openapi-fetch";
 import { cache } from "react";
+import { config } from "./config";
+import type { paths } from "./zaproxy";
 
 export class ScannerError extends Error {}
 
@@ -10,7 +12,7 @@ const client = cache(() =>
     baseUrl: config().ZAP_BASE_URL,
     headers: {
       "X-ZAP-API-Key": config().ZAP_API_KEY,
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "application/json",
     },
   })
 );
@@ -20,8 +22,7 @@ type StartSpiderScanParams = {
 };
 
 export async function startSpiderScan({ url }: StartSpiderScanParams) {
-  // @ts-expect-error - bug in zaproxy openapi
-  const { data, error } = await client().POST("/JSON/spider/action/scan/", {
+  const { data, error } = await client().GET("/JSON/spider/action/scan/", {
     params: {
       query: {
         url,
