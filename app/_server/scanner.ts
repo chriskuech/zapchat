@@ -83,7 +83,13 @@ type GetVulnerabilitiesParams = {
   url: string;
 };
 
-const severities = ["Low", "Medium", "High", "Critical"] as const;
+const severities = [
+  "Informational",
+  "Low",
+  "Medium",
+  "High",
+  "Critical",
+] as const;
 const SeveritySchema = z.enum(severities);
 
 const AlertSchema = z.object({

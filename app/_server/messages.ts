@@ -11,6 +11,8 @@ import {
   startSpiderScan,
 } from "./scanner";
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const systemPrompt = `
 You are a chat assistant for a website vulnerability scanner abstracting OWASP ZAP API (aka zaproxy).
 Users will provide you with a URL and you will scan it for vulnerabilities.
@@ -30,7 +32,7 @@ Return messages in markdown format. Emphasis on clear, actionable vulnerability 
 `;
 
 const introMessage = `
-Hello! I'm zapchat, your vulnerability scanner chatbot.
+Hello! I'm zapchat, your vulnerability scanner chatbot powered by OWASP ZAP.
 
 I can help you scan a website for vulnerabilities and understand your risk exposure.
 
@@ -48,6 +50,11 @@ const tools: Tool[] = [
     parameters: z.object({ url: z.string() }),
     function: async ({ url }) => {
       await startSpiderScan({ url });
+
+      // TODO: The Active Scan (allegedly) can start after starting the Spider Scan,
+      //       but seems to (in practice) hit a race condition.
+      await sleep(1_000);
+
       const activeScan = await startActiveScan({ url });
 
       return activeScan;
@@ -108,6 +115,9 @@ export async function sendMessage(message: string) {
 
   messages.push({ content: message, role: "user" });
 
+  // TODO: We are hacking everything into the request-response lifecycle of the user's message to avoid implementing push events.
+  //       This is not scalable. We need to offload the responsibility of checking the status of the scan to a background job.
+  //       Similarly, it will naively busy wait for the scan to complete, which is only being guarded against by the prompt instructions.
   while (messages.at(-1)?.role !== "assistant") {
     logMessages(messages);
     const completions = await getCompletions(messages, tools);
@@ -118,6 +128,7 @@ export async function sendMessage(message: string) {
   await saveMessages(messages);
 }
 
+// TODO: Replace with tracing
 const logMessages = (messages: ChatCompletionMessageParam[]) => {
   console.log("MESSAGES", JSON.stringify(messages, null, 2));
 };
