@@ -1,7 +1,12 @@
 /**
  * @fileoverview
  * This script runs a vulnerability scan on a given URL and prints the top 3 most important vulnerabilities.
- * You must provide a URL as an argument to the script, ex: `npx tsx ./app/script.ts https://juice-shop.herokuapp.com`
+ * You must provide a URL to scan as an argument to the script.
+ *
+ * @example
+ * ```bash
+ * npx tsx ./app/script.ts https://juice-shop.herokuapp.com
+ * ```
  *
  * @author [@chriskuech](https://github.com/chriskuech)
  * @version 0.0.1
