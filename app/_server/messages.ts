@@ -5,7 +5,7 @@ import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { z } from "zod";
 import { getCompletions, sanitize, Tool } from "./llm";
 import {
-  checkScanStatus as checkActiveScanStatus,
+  getActiveScanStatus as checkActiveScanStatus,
   getSpiderScanStatus as checkSpiderScanStatus,
   getVulnerabilities,
   startActiveScan,
@@ -53,7 +53,7 @@ const tools: Tool[] = [
       The scan will run asynchronously and return its scan ID.
     `),
     parameters: z.object({ url: z.string() }),
-    function: startSpiderScan,
+    function: ({ url }) => startSpiderScan(url),
   },
   {
     name: checkSpiderScanStatus.name,
@@ -62,7 +62,7 @@ const tools: Tool[] = [
       Returns the status of the spider scan with the given scan ID.
     `),
     parameters: z.object({ scanId: z.string() }),
-    function: checkSpiderScanStatus,
+    function: ({ scanId }) => checkSpiderScanStatus(scanId),
   },
   {
     name: startActiveScan.name,
@@ -72,7 +72,7 @@ const tools: Tool[] = [
       Internally, this tool will start a "Spider Scan" then an "Active Scan" and return the "Active Scan" API response.
     `),
     parameters: z.object({ url: z.string() }),
-    function: startActiveScan,
+    function: ({ url }) => startActiveScan(url),
   },
   {
     name: checkActiveScanStatus.name,
@@ -81,7 +81,7 @@ const tools: Tool[] = [
       Returns the status of the "Active Scan" scan with the given scan ID.
     `),
     parameters: z.object({ scanId: z.string() }),
-    function: checkActiveScanStatus,
+    function: ({ scanId }) => checkActiveScanStatus(scanId),
   },
   {
     name: getVulnerabilities.name,
@@ -90,7 +90,7 @@ const tools: Tool[] = [
       ${checkActiveScanStatus.name} must be called first to ensure the scan has completed.
     `),
     parameters: z.object({ url: z.string() }),
-    function: getVulnerabilities,
+    function: ({ url }) => getVulnerabilities(url),
   },
 ];
 

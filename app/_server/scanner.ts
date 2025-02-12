@@ -1,5 +1,3 @@
-import "server-only";
-
 import createClient from "openapi-fetch";
 import { cache } from "react";
 import { map, pipe, prop, sortBy, take } from "remeda";
@@ -19,11 +17,13 @@ const client = cache(() =>
   })
 );
 
-type StartSpiderScanParams = {
-  url: string;
-};
-
-export async function startSpiderScan({ url }: StartSpiderScanParams) {
+/**
+ * Start a spider scan on the given URL.
+ *
+ * @param url - The URL to scan.
+ * @returns The ID of the spider scan.
+ */
+export async function startSpiderScan(url: string) {
   const { data, error } = await client().GET("/JSON/spider/action/scan/", {
     params: {
       query: {
@@ -36,16 +36,16 @@ export async function startSpiderScan({ url }: StartSpiderScanParams) {
     throw new ScannerError("Failed to start spider scan", { cause: error });
   }
 
-  return data;
+  return z.object({ scan: z.string() }).parse(data).scan;
 }
 
-type GetSpiderScanStatusParams = {
-  scanId: string;
-};
-
-export async function getSpiderScanStatus({
-  scanId,
-}: GetSpiderScanStatusParams) {
+/**
+ * Get the status of a spider scan.
+ *
+ * @param scanId - The ID of the spider scan.
+ * @returns Whether the spider scan is complete.
+ */
+export async function getSpiderScanStatus(scanId: string) {
   const { data, error } = await client().GET("/JSON/spider/view/status/", {
     params: {
       query: {
@@ -60,14 +60,16 @@ export async function getSpiderScanStatus({
     });
   }
 
-  return data;
+  return z.object({ status: z.string() }).parse(data).status === "100";
 }
 
-type StartActiveScanParams = {
-  url: string;
-};
-
-export async function startActiveScan({ url }: StartActiveScanParams) {
+/**
+ * Start an active scan on the given URL.
+ *
+ * @param url - The URL to scan.
+ * @returns The ID of the active scan.
+ */
+export async function startActiveScan(url: string) {
   const { data, error } = await client().GET("/JSON/ascan/action/scan/", {
     params: {
       query: {
@@ -80,14 +82,16 @@ export async function startActiveScan({ url }: StartActiveScanParams) {
     throw new ScannerError("Failed to start active scan", { cause: error });
   }
 
-  return data;
+  return z.object({ scan: z.string() }).parse(data).scan;
 }
 
-type CheckScanStatusParams = {
-  scanId: string;
-};
-
-export async function checkScanStatus({ scanId }: CheckScanStatusParams) {
+/**
+ * Get the status of an active scan.
+ *
+ * @param scanId - The ID of the active scan.
+ * @returns Whether the active scan is complete.
+ */
+export async function getActiveScanStatus(scanId: string) {
   const { data, error } = await client().GET("/JSON/ascan/view/status/", {
     params: {
       query: {
@@ -100,12 +104,8 @@ export async function checkScanStatus({ scanId }: CheckScanStatusParams) {
     throw new ScannerError("Failed to check scan status", { cause: error });
   }
 
-  return data;
+  return z.object({ status: z.string() }).parse(data).status === "100";
 }
-
-type GetVulnerabilitiesParams = {
-  url: string;
-};
 
 const severities = [
   "Informational",
@@ -125,11 +125,19 @@ const AlertSchema = z.object({
   solution: z.string(),
 });
 
+export type Vulnerability = z.infer<typeof AlertSchema>;
+
 const GetVulnerabilitiesResponseSchema = z.object({
   alerts: z.array(AlertSchema),
 });
 
-export async function getVulnerabilities({ url }: GetVulnerabilitiesParams) {
+/**
+ * Get the vulnerabilities of a scan.
+ *
+ * @param url - The URL to scan.
+ * @returns The vulnerabilities of the scan.
+ */
+export async function getVulnerabilities(url: string) {
   const { data, error } = await client().GET("/JSON/alert/view/alerts/", {
     params: {
       query: {
