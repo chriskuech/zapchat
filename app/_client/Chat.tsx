@@ -1,14 +1,14 @@
 "use client";
 import "client-only";
 
+import { Message } from "@/message.type";
 import { marked } from "marked";
-import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { clearMessages, sendMessage } from "../actions";
 
 type ChatProps = {
-  messages: ChatCompletionMessageParam[];
+  messages: Message[];
 };
 
 export default function Chat({ messages }: ChatProps) {
@@ -35,10 +35,7 @@ export default function Chat({ messages }: ChatProps) {
         <div className="container mx-auto px-4 space-y-4">
           {messages
             ?.flatMap(({ role, content }) =>
-              ["user", "assistant"].includes(role) &&
-              typeof content === "string"
-                ? [{ role, content }]
-                : []
+              typeof content === "string" ? [{ role, content }] : []
             )
             .map(({ role, content }, index) => (
               <div
@@ -46,7 +43,7 @@ export default function Chat({ messages }: ChatProps) {
                 key={index + content}
                 className={`rounded-lg p-4 max-w-[80%]`}
                 style={
-                  role === "assistant"
+                  role === "ai"
                     ? {
                         backgroundColor: "rgba(255 0 0 / 0.5)",
                         marginRight: "auto",

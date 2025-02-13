@@ -7,7 +7,7 @@ export async function sendMessage(message: string) {
 }
 
 export async function clearMessages() {
-  await server.saveMessages(undefined);
+  await server.saveMessages([]);
 }
 
 export async function getMessages() {
